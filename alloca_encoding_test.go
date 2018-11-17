@@ -3,39 +3,111 @@ package main
 import (
 	"testing"
 
+	"github.com/k0kubun/pp"
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
 func TestAllocaEncoding(t *testing.T) {
-	m := llvm.NewModule("foo")
-
-	f := llvm.AddFunction(
-		m,
-		"foo",
-		llvm.FunctionType(llvm.ArrayType(llvm.Int8Type(), 8), nil, false),
-	)
-
-	b := llvm.NewBuilder()
-	b.SetInsertPointAtEnd(llvm.AddBasicBlock(f, ""))
-
-	tt := llvm.StructType(
-		[]llvm.Type{
-			llvm.Int8Type(),
-			llvm.Int8Type(),
-			llvm.Int8Type(),
-			llvm.Int8Type(),
-			llvm.Int8Type(),
-			llvm.Int8Type(),
-			llvm.Int8Type(),
-			llvm.Int8Type(),
+	for _, ts := range [][2]llvm.Type{
+		{
+			llvm.StructType(
+				[]llvm.Type{
+					llvm.Int8Type(),
+					llvm.Int8Type(),
+					llvm.Int8Type(),
+					llvm.Int8Type(),
+					llvm.Int8Type(),
+					llvm.Int8Type(),
+					llvm.Int8Type(),
+					llvm.Int8Type(),
+				},
+				false,
+			),
+			llvm.ArrayType(llvm.Int8Type(), 8),
 		},
-		false,
-	)
+		{
+			llvm.ArrayType(llvm.Int8Type(), 8),
+			llvm.StructType(
+				[]llvm.Type{
+					llvm.Int8Type(),
+					llvm.Int8Type(),
+					llvm.Int8Type(),
+					llvm.Int8Type(),
+					llvm.Int8Type(),
+					llvm.Int8Type(),
+					llvm.Int8Type(),
+					llvm.Int8Type(),
+				},
+				false,
+			),
+		},
+		{
+			llvm.ArrayType(llvm.Int8Type(), 8),
+			llvm.StructType(
+				[]llvm.Type{
+					llvm.Int8Type(),
+					llvm.Int8Type(),
+					llvm.Int8Type(),
+					llvm.Int8Type(),
+					llvm.Int32Type(),
+				},
+				false,
+			),
+		},
+		{
+			llvm.StructType(
+				[]llvm.Type{
+					llvm.Int8Type(),
+					llvm.Int8Type(),
+					llvm.Int8Type(),
+					llvm.Int8Type(),
+					llvm.Int32Type(),
+				},
+				false,
+			),
+			llvm.ArrayType(llvm.Int8Type(), 8),
+		},
+	} {
+		m := llvm.NewModule("foo")
 
-	v := b.CreateAlloca(tt, "")
-	b.CreateStore(llvm.ConstNull(tt), v)
-	b.Create
-	b.CreateRetVoid()
+		f := llvm.AddFunction(
+			m,
+			"foo",
+			llvm.FunctionType(ts[1], []llvm.Type{ts[0]}, false),
+		)
 
-	f.Dump()
+		b := llvm.NewBuilder()
+		b.SetInsertPointAtEnd(llvm.AddBasicBlock(f, ""))
+
+		v := b.CreateAlloca(ts[0], "")
+		b.CreateStore(f.FirstParam(), v)
+		b.CreateRet(
+			b.CreateLoad(
+				b.CreateBitCast(
+					v,
+					llvm.PointerType(ts[1], 0),
+					"",
+				),
+				"",
+			),
+		)
+
+		f.Dump()
+
+		llvm.VerifyFunction(f, llvm.AbortProcessAction)
+
+		pb := llvm.NewPassManagerBuilder()
+		pb.SetOptLevel(3)
+
+		pm := llvm.NewFunctionPassManagerForModule(m)
+		pb.PopulateFunc(pm)
+
+		pm.RunFunc(f)
+
+		pm = llvm.NewPassManager()
+		pb.Populate(pm)
+		pp.Println(pm.Run(m))
+
+		f.Dump()
+	}
 }
