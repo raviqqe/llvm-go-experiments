@@ -1,4 +1,4 @@
-package main
+package experiments
 
 import (
 	"testing"
@@ -96,17 +96,7 @@ func TestAllocaEncoding(t *testing.T) {
 
 		llvm.VerifyFunction(f, llvm.AbortProcessAction)
 
-		pb := llvm.NewPassManagerBuilder()
-		pb.SetOptLevel(3)
-
-		pm := llvm.NewFunctionPassManagerForModule(m)
-		pb.PopulateFunc(pm)
-
-		pm.RunFunc(f)
-
-		pm = llvm.NewPassManager()
-		pb.Populate(pm)
-		pp.Println(pm.Run(m))
+		pp.Println(optimizeModule(m))
 
 		f.Dump()
 	}

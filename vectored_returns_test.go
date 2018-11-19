@@ -1,4 +1,4 @@
-package main
+package experiments
 
 import (
 	"testing"
@@ -93,17 +93,7 @@ func TestVectoredReturnsWithPointersToResults(t *testing.T) {
 
 	m.Dump()
 
-	pb := llvm.NewPassManagerBuilder()
-	pb.SetOptLevel(3)
-
-	pm := llvm.NewFunctionPassManagerForModule(m)
-	pb.PopulateFunc(pm)
-
-	pm.RunFunc(f)
-
-	pm = llvm.NewPassManager()
-	pb.Populate(pm)
-	pp.Println(pm.Run(m))
+	pp.Println(optimizeModule(m))
 
 	m.Dump()
 }
