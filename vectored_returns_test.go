@@ -32,7 +32,6 @@ func TestVectoredReturnsWithPointersToResults(t *testing.T) {
 		),
 	)
 	f.FirstParam().SetName("environment")
-	f.AddFunctionAttr(llvm.GlobalContext().CreateStringAttribute("noinline", ""))
 
 	b := llvm.NewBuilder()
 	b.SetInsertPointAtEnd(llvm.AddBasicBlock(f, ""))
