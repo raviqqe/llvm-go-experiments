@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"llvm.org/llvm/bindings/go/llvm"
+	"github.com/llvm-mirror/llvm/bindings/go/llvm"
 )
 
 func TestPhi(t *testing.T) {

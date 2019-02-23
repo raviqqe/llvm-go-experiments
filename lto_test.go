@@ -3,7 +3,7 @@ package experiments
 import (
 	"testing"
 
-	"llvm.org/llvm/bindings/go/llvm"
+	"github.com/llvm-mirror/llvm/bindings/go/llvm"
 )
 
 func TestLTO(t *testing.T) {

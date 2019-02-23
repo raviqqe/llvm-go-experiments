@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/k0kubun/pp"
-	"llvm.org/llvm/bindings/go/llvm"
+	"github.com/llvm-mirror/llvm/bindings/go/llvm"
 )
 
 var caseFunctionType = llvm.PointerType(

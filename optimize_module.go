@@ -1,7 +1,7 @@
 package experiments
 
 import (
-	"llvm.org/llvm/bindings/go/llvm"
+	"github.com/llvm-mirror/llvm/bindings/go/llvm"
 )
 
 func optimizeModule(m llvm.Module) bool {
